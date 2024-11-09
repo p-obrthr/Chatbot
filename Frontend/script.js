@@ -33,7 +33,7 @@ function renderMessages() {
     setTimeout(scrollToBottom, 100);
 }
 
-function sendMessage() {
+async function sendMessage() {
     const text = userInput.value.trim();
     if (text === "") return;
 
@@ -42,12 +42,32 @@ function sendMessage() {
     isLoading = true;
     renderMessages();
 
-    // dummy  answer
-    setTimeout(() => {
+    try {
+        const response = await fetch("http://localhost:4000/api/messages", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ question: text })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            setTimeout(() => {
+                isLoading = false;
+                messages.push({ content: data.Answer, isUser: false });
+                renderMessages();
+            }, 3000);
+        } else {
+            isLoading = false;
+            messages.push({ content: "error: response problem", isUser: false });
+            renderMessages();
+        }
+    } catch (error) {
         isLoading = false;
-        messages.push({ content: "Hello", isUser: false });
+        messages.push({ content: "error: server problem", isUser: false });
         renderMessages();
-    }, 3000);
+    }
 }
 
 function scrollToBottom() {
