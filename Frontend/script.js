@@ -53,11 +53,10 @@ async function sendMessage() {
 
         if (response.ok) {
             const data = await response.json();
-            setTimeout(() => {
-                isLoading = false;
-                messages.push({ content: data.Answer, isUser: false });
-                renderMessages();
-            }, 3000);
+            isLoading = false;
+            console.log(data)
+            messages.push({ content: data.answer, isUser: false });
+            renderMessages();
         } else {
             isLoading = false;
             messages.push({ content: "error: response problem", isUser: false });

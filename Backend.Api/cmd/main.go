@@ -3,16 +3,17 @@ package main
 import (
 	"fmt"
 	"log"
-	"strings"
+	"os"
 
+	"Backend.Api/services"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 type Message struct {
-	Id       int    `json: id`
-	Question string `json: question`
-	Answer   string `json: answer`
+	Id       int    `json:"id"`
+	Question string `json:"question"`
+	Answer   string `json:"answer"`
 }
 
 func main() {
@@ -25,6 +26,14 @@ func main() {
 	}))
 
 	messages := []Message{}
+
+	apiKey, exists := os.LookupEnv("OPENAI_API_KEY")
+	if !exists {
+		log.Fatal("no apikey found in envionment variable")
+	}
+
+	client := services.NewOpenAIClient(apiKey)
+	systemPrompt := "You are a very friendly and polite Chatbot."
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(200).JSON(fiber.Map{"msg": "hello world"})
@@ -60,10 +69,17 @@ func main() {
 
 		message.Id = len(messages) + 1
 
-		//simulate processing
-		answer := strings.ToUpper(message.Question)
-		message.Answer = answer
+		// simulate processing
+		// answer := strings.ToUpper(message.Question)
+		// message.Answer = answer
 
+		answer, err := client.SendMessage(systemPrompt, message.Question)
+
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		}
+
+		message.Answer = answer
 		messages = append(messages, *message)
 
 		return c.Status(201).JSON(message)
