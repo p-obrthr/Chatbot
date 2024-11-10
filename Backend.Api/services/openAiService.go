@@ -28,22 +28,28 @@ type responseBody struct {
 }
 
 type OpenAIClient struct {
-	APIKey string
+	APIKey              string
+	conversationHistory []message
 }
 
-func NewOpenAIClient(apiKey string) *OpenAIClient {
-	return &OpenAIClient{APIKey: apiKey}
+func NewOpenAIClient(apiKey string, systemPrompt string) *OpenAIClient {
+	return &OpenAIClient{
+		APIKey:              apiKey,
+		conversationHistory: []message{{Role: "system", Content: systemPrompt}}}
+
 }
 
-func (client *OpenAIClient) SendMessage(systemPrompt, userPrompt string) (string, error) {
+func (client *OpenAIClient) SendMessage(userPrompt string) (string, error) {
 	url := "https://api.openai.com/v1/chat/completions"
 
+	client.conversationHistory = append(client.conversationHistory, message{
+		Role:    "user",
+		Content: userPrompt,
+	})
+
 	reqBody := requestBody{
-		Model: "gpt-4o-mini",
-		Messages: []message{
-			{Role: "system", Content: systemPrompt},
-			{Role: "user", Content: userPrompt},
-		},
+		Model:       "gpt-4o-mini",
+		Messages:    client.conversationHistory,
 		Temperature: 0.7,
 	}
 
@@ -78,7 +84,12 @@ func (client *OpenAIClient) SendMessage(systemPrompt, userPrompt string) (string
 	}
 
 	if len(resBody.Choices) > 0 {
-		return resBody.Choices[0].Message.Content, nil
+		resp := resBody.Choices[0].Message.Content
+		client.conversationHistory = append(client.conversationHistory, message{
+			Role:    "assistant",
+			Content: resp,
+		})
+		return resp, nil
 	}
 
 	return "", fmt.Errorf("no response from openAi")

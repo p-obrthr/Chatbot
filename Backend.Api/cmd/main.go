@@ -32,8 +32,8 @@ func main() {
 		log.Fatal("no apikey found in envionment variable")
 	}
 
-	client := services.NewOpenAIClient(apiKey)
 	systemPrompt := "You are a very friendly and polite Chatbot."
+	client := services.NewOpenAIClient(apiKey, systemPrompt)
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(200).JSON(fiber.Map{"msg": "hello world"})
@@ -73,7 +73,7 @@ func main() {
 		// answer := strings.ToUpper(message.Question)
 		// message.Answer = answer
 
-		answer, err := client.SendMessage(systemPrompt, message.Question)
+		answer, err := client.SendMessage(message.Question)
 
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
