@@ -32,7 +32,7 @@ func main() {
 		log.Fatal("no apikey found in envionment variable")
 	}
 
-	systemPrompt := "You are a very friendly and polite Chatbot."
+	systemPrompt := "You are a very friendly and polite Chatbot. Use markdown for formatting the output."
 	client := services.NewOpenAIClient(apiKey, systemPrompt)
 
 	app.Get("/", func(c *fiber.Ctx) error {

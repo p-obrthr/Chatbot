@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'dart:convert';
+
 
 void main() {
   runApp(ChatApp());
@@ -56,7 +58,8 @@ class _ChatScreenState extends State<ChatScreen> {
         });
       } else {
         setState(() {
-          _messages.add({'content': 'Error: response problem', 'isUser': false});
+          _messages.add(
+              {'content': 'Error: response problem', 'isUser': false});
         });
       }
     } catch (error) {
@@ -105,7 +108,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   final message = _messages[index];
                   final isUser = message['isUser'] as bool;
                   return Container(
-                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment: isUser ? Alignment.centerRight : Alignment
+                        .centerLeft,
                     padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                     child: Container(
                       padding: EdgeInsets.all(10),
@@ -113,14 +117,20 @@ class _ChatScreenState extends State<ChatScreen> {
                         color: isUser ? Colors.blue[100] : Colors.grey[300],
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text(message['content'] as String),
+                      child: message['content'] != null &&
+                          message['content'].contains(RegExp(r'#|[^\w\s]'))
+                          ? MarkdownBody(
+                        data: message['content'] as String,
+                      )
+                          : Text(message['content'] as String),
                     ),
                   );
                 },
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0, vertical: 8.0),
               child: Row(
                 children: [
                   Expanded(
@@ -128,7 +138,8 @@ class _ChatScreenState extends State<ChatScreen> {
                       controller: _controller,
                       decoration: InputDecoration(
                         hintText: 'Your message',
-                        contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 12.0),
+                        contentPadding: EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 12.0),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                         ),

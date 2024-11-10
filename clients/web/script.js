@@ -14,7 +14,7 @@ function renderMessages() {
     messages.forEach(message => {
         const messageDiv = document.createElement("div");
         messageDiv.classList.add("message", message.isUser ? "user-message" : "partner-message");
-        messageDiv.textContent = message.content;
+        messageDiv.innerHTML = markdownToHtml(message.content); 
         messagesContainer.appendChild(messageDiv);
     });
 
@@ -32,6 +32,18 @@ function renderMessages() {
     }
     setTimeout(scrollToBottom, 100);
 }
+
+function markdownToHtml(text) {
+    text = text.replace(/(\*\*|__)(.*?)\1/g, '<strong>$2</strong>'); 
+    text = text.replace(/(\*|_)(.*?)\1/g, '<em>$2</em>'); 
+    text = text.replace(/^\#\s(.*)/gm, '<h1>$1</h1>'); 
+    text = text.replace(/^\#\#\s(.*)/gm, '<h2>$1</h2>'); 
+    text = text.replace(/^\#\#\#\s(.*)/gm, '<h3>$1</h3>'); 
+    text = text.replace(/^\- (.*)/gm, '<ul><li>$1</li></ul>');
+
+    return text;
+}
+
 
 async function sendMessage() {
     const text = userInput.value.trim();
